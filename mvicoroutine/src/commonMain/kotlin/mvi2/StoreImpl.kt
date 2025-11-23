@@ -27,7 +27,14 @@ class StoreImpl<Intent, Action, State, Message, Label> (
   private val _label = labelFlow
   override val labels: MutableSharedFlow<Label> = _label
 
-  private inner class ExecutorScopeImpl : ExecutorScope<Intent, Action, State, Message, Label> {
+  private inner class BootstrapperScopeImpl : BootstrapperScope<Action> {
+    override val coroutineScope: CoroutineScope = scope
+    override fun dispatch(action: Action) {
+      executorScope.dispatchAction(action)
+    }
+  }
+
+  private inner class ExecutorScopeImpl : ExecutorScope<Action, State, Message, Label> {
     override fun state() = _state.value
 
     override val coroutineScope: CoroutineScope = scope
@@ -47,6 +54,7 @@ class StoreImpl<Intent, Action, State, Message, Label> (
     }
   }
 
+  private val bootstrapperScope = BootstrapperScopeImpl()
   private val executorScope = ExecutorScopeImpl()
 
   init {
@@ -65,10 +73,8 @@ class StoreImpl<Intent, Action, State, Message, Label> (
     executor.init()
     bootstrapper?.init()
     bootstrapper?.let { bs ->
-     bs.bootstrap { action ->
-        with(executor) {
-          executorScope.executeAction(action)
-        }
+      with(bs) {
+        bootstrapperScope.bootstrap()
       }
     }
   }

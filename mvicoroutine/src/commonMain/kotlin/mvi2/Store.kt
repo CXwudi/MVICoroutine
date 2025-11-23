@@ -36,9 +36,19 @@ interface Store<Intent, State, Label> {
 fun interface Reducer<State, Message> {
   fun reduce(state: State, message: Message): State
 }
+/**
+ * Scope available to the Bootstrapper.
+ * Lets the Bootstrapper:
+ *  - dispatch Actions (chained internal pipelines)
+ *  - launch additional work on store's CoroutineScope if desired
+ */
+interface BootstrapperScope<Action> {
+  val coroutineScope: CoroutineScope
+  fun dispatch(action: Action)
+}
 
 fun interface Bootstrapper<Action> {
-  fun bootstrap(dispatchAction: (Action) -> Unit)
+  fun BootstrapperScope<Action>.bootstrap()
 
   fun init() {}
   fun dispose() {}
@@ -53,7 +63,7 @@ fun interface Bootstrapper<Action> {
  *  - dispatch Actions (chained internal pipelines)
  *  - launch additional work on store's CoroutineScope if desired
  */
-interface ExecutorScope<Intent, Action, State, Message, Label> {
+interface ExecutorScope<Action, State, Message, Label> {
   /**
    * Read-only state. Implementation should use `get()` delegate
    */
@@ -69,8 +79,8 @@ interface ExecutorScope<Intent, Action, State, Message, Label> {
  * Executor handles both Intents and Actions.
  */
 interface Executor<Intent, Action, State, Message, Label> {
-  fun ExecutorScope<Intent, Action, State, Message, Label>.executeIntent(intent: Intent)
-  fun ExecutorScope<Intent, Action, State, Message, Label>.executeAction(action: Action)
+  fun ExecutorScope<Action, State, Message, Label>.executeIntent(intent: Intent)
+  fun ExecutorScope<Action, State, Message, Label>.executeAction(action: Action)
 
   fun init() {}
   fun dispose() {}
