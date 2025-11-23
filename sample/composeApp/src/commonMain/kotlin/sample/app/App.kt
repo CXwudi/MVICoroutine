@@ -5,25 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import kotlinx.coroutines.launch
-import mvi.CoroutineStore
 import poc.cx.getFibonacciNumbers
-import sample.app.store.CounterBootstrapper
-import sample.app.store.CounterExecutor
-import sample.app.store.CounterIntent
-import sample.app.store.CounterReducer
-import sample.app.store.CounterState
 
 @Composable
 fun App() {
@@ -41,17 +30,7 @@ fun App() {
 @Composable
 fun AppContent() {
 
-  val store = remember {
-    CoroutineStore(
-      initialState = CounterState(),
-      bootstrapper = CounterBootstrapper(),
-      executor = CounterExecutor(),
-      reducer = CounterReducer(),
-      autoInit = true
-    )
-  }
 
-  val state by store.state.collectAsState()
 
   val scope = rememberCoroutineScope()
   Box(
@@ -60,14 +39,7 @@ fun AppContent() {
   ) {
     Column {
       BasicText("getFibonacciNumbers(7)=${getFibonacciNumbers(7).joinToString(", ")}")
-      BasicText("state.value=${state.value}")
-      Button(onClick = {
-        scope.launch {
-          store.sendIntent(CounterIntent.Increment)
-        }
-      }) {
-        BasicText("Increment")
-      }
+
     }
   }
 }
