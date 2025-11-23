@@ -39,6 +39,9 @@ fun interface Reducer<State, Message> {
 
 fun interface Bootstrapper<Action> {
   fun bootstrap(dispatchAction: (Action) -> Unit)
+
+  fun init() {}
+  fun dispose() {}
 }
 
 /**
@@ -68,4 +71,7 @@ interface ExecutorScope<Intent, Action, State, Message, Label> {
 interface Executor<Intent, Action, State, Message, Label> {
   fun ExecutorScope<Intent, Action, State, Message, Label>.executeIntent(intent: Intent)
   fun ExecutorScope<Intent, Action, State, Message, Label>.executeAction(action: Action)
+
+  fun init() {}
+  fun dispose() {}
 }

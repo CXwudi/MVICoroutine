@@ -62,8 +62,10 @@ class StoreImpl<Intent, Action, State, Message, Label> (
   }
 
   override fun init() {
+    executor.init()
+    bootstrapper?.init()
     bootstrapper?.let { bs ->
-      bs.bootstrap { action ->
+     bs.bootstrap { action ->
         with(executor) {
           executorScope.executeAction(action)
         }
@@ -73,6 +75,8 @@ class StoreImpl<Intent, Action, State, Message, Label> (
 
   override fun dispose() {
     job.cancel()
+    bootstrapper?.dispose()
+    executor.dispose()
   }
 
 }
