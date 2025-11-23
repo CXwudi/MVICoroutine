@@ -27,7 +27,7 @@ sealed interface CounterMessage {
   data class Set(val value: Int) : CounterMessage
 }
 
-data class CounterState(val value: Int = 0, val initialized: Boolean = false)
+data class CounterState(val value: Int = -1, val initialized: Boolean = false)
 
 sealed interface CounterLabel
 
