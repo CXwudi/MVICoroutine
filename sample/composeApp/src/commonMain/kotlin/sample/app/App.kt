@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,7 +37,8 @@ fun App() {
 @Composable
 fun AppContent() {
 
-  val store = remember { createCounterStore() }
+  val scope = rememberCoroutineScope()
+  val store = remember { createCounterStore(scope) }
   val state by store.state.collectAsState()
 
   Box(

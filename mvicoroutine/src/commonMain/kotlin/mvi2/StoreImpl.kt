@@ -10,16 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 
 class StoreImpl<Intent, Action, State, Message, Label> (
   initialState: State,
+  private val scope: CoroutineScope,
   autoInit: Boolean = true,
   private val bootstrapper: Bootstrapper<Action>? = null,
   private val executor: Executor<Intent, Action, State, Message, Label>,
   private val reducer: Reducer<State, Message>,
-  private val dispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
   labelFlow: MutableSharedFlow<Label> = MutableSharedFlow(),
 ) : Store<Intent, State, Label> {
 
-  private val job = SupervisorJob()
-  private val scope: CoroutineScope = CoroutineScope(dispatcher + job)
 
   private val _state = MutableStateFlow(initialState)
   override val state: StateFlow<State> = _state
@@ -80,7 +78,6 @@ class StoreImpl<Intent, Action, State, Message, Label> (
   }
 
   override fun dispose() {
-    job.cancel()
     bootstrapper?.dispose()
     executor.dispose()
   }

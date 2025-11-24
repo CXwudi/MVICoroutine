@@ -1,6 +1,7 @@
 package sample.app.store
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,14 +33,14 @@ sealed interface CounterAction {
 }
 
 fun createCounterStore(
-  dispatcher: CoroutineDispatcher = Dispatchers.Main.immediate
+  scope: CoroutineScope
 ): Store<CounterIntent, CounterState, CounterLabel> =
   StoreImpl(
     initialState = CounterState(),
+    scope = scope,
     bootstrapper = CounterBootstrapper(),
     executor = CounterExecutor(),
     reducer = CounterReducer(),
-    dispatcher = dispatcher
   )
 
 private class CounterBootstrapper : Bootstrapper<CounterAction> {
