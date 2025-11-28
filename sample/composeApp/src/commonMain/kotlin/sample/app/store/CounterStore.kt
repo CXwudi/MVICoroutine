@@ -37,7 +37,6 @@ fun createCounterStore(
 ): Store<CounterIntent, CounterState, CounterLabel> =
   StoreImpl(
     initialState = CounterState(),
-    scope = scope,
     bootstrapper = CounterBootstrapper(scope),
     executor = CounterExecutor(),
     reducer = CounterReducer(),

@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.update
 
 class StoreImpl<Intent, Action, Message, State, Label> (
   initialState: State,
-  private val scope: CoroutineScope,
   autoInit: Boolean = true,
   private val bootstrapper: Bootstrapper<Action>? = null,
   private val executor: Executor<Intent, Action, Message, State, Label>,
