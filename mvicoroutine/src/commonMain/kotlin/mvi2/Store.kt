@@ -21,22 +21,29 @@ interface Store<Intent, State, Label> {
   fun sendIntent(intent: Intent)
   /**
    * Starts the store manually.
+   *
+   * This will call `init()` first on Executor, then on the Bootstrapper (if present),
+   * and call `bootstrap()` on the Bootstrapper.
+   *
+   * Automatically called in the constructor if `autoInit` is `true`.
    */
   fun init()
   /**
-   * Cancels internal coroutines and prevents further processing.
+   * Call `dispose()` on the Bootstrapper (if present) and Executor.
    */
   fun dispose()
 }
 
+/**
+ * A pure function to update the state given a message.
+ */
 fun interface Reducer<State, Message> {
   fun reduce(state: State, message: Message): State
 }
 /**
  * Scope available to the Bootstrapper.
- * Lets the Bootstrapper:
- *  - dispatch Actions (chained internal pipelines)
- *  - launch additional work on store's CoroutineScope if desired
+ *
+ * Currently only allows dispatching Actions.
  */
 interface BootstrapperScope<Action> {
   fun dispatch(action: Action)
@@ -56,16 +63,15 @@ fun interface Bootstrapper<Action> {
  *  - dispatch Messages (state changes)
  *  - publish Labels (one-off events)
  *  - dispatch Actions (chained internal pipelines)
- *  - launch additional work on store's CoroutineScope if desired
  */
 interface ExecutorScope<Action, Message, State, Label> {
   /**
-   * Read-only state. Implementation should use `get()` delegate
+   * Read-only state.
    */
   fun state(): State
 
   fun dispatch(message: Message)
-  fun tryEmit(label: Label): Boolean
+  fun tryPublish(label: Label): Boolean
   fun dispatchAction(action: Action)
 }
 

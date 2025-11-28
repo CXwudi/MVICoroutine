@@ -35,7 +35,7 @@ class StoreImpl<Intent, Action, Message, State, Label> (
       _state.update { reducer.reduce(it, message) }
     }
 
-    override fun tryEmit(label: Label): Boolean {
+    override fun tryPublish(label: Label): Boolean {
       return _label.tryEmit(label)
     }
 
