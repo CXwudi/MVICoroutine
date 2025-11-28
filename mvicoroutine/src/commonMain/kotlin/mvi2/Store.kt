@@ -10,25 +10,22 @@ interface Store<Intent, State, Label> {
   /**
    * Process an Intent.
    *
-   * Guarantee (synchronous part):
-   * - When this method returns, all messages/actions synchronously
-   *   dispatched from this intent (and their chains) have already
-   *   produced their state updates.
+   * When this method returns, all messages/actions synchronously
+   * dispatched from this intent (and their chains) have already
+   * produced their state updates.
    *
-   * Additional updates from async work launched in Executor/Bootstrapper
+   * However, additional updates from async work launched by coroutine scope
    * may arrive later.
+   *
+   * Noted, it is better to call this method from the UI thread.
    */
   fun sendIntent(intent: Intent)
   /**
-   * Starts the store (runs bootstrapper, etc.).
-   * Idempotent and thread-safe.
-   *
-   * When autoInit = false, you must call this manually.
+   * Starts the store manually.
    */
   fun init()
   /**
    * Cancels internal coroutines and prevents further processing.
-   * Idempotent.
    */
   fun dispose()
 }
@@ -63,7 +60,7 @@ fun interface Bootstrapper<Action> {
  *  - dispatch Actions (chained internal pipelines)
  *  - launch additional work on store's CoroutineScope if desired
  */
-interface ExecutorScope<Action, State, Message, Label> {
+interface ExecutorScope<Action, Message, State, Label> {
   /**
    * Read-only state. Implementation should use `get()` delegate
    */
@@ -78,9 +75,9 @@ interface ExecutorScope<Action, State, Message, Label> {
 /**
  * Executor handles both Intents and Actions.
  */
-interface Executor<Intent, Action, State, Message, Label> {
-  fun ExecutorScope<Action, State, Message, Label>.executeIntent(intent: Intent)
-  fun ExecutorScope<Action, State, Message, Label>.executeAction(action: Action)
+interface Executor<Intent, Action, Message, State, Label> {
+  fun ExecutorScope<Action, Message, State, Label>.executeIntent(intent: Intent)
+  fun ExecutorScope<Action, Message, State, Label>.executeAction(action: Action)
 
   fun init() {}
   fun dispose() {}

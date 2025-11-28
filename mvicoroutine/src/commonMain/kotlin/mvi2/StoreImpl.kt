@@ -4,26 +4,28 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
-class StoreImpl<Intent, Action, State, Message, Label> (
+class StoreImpl<Intent, Action, Message, State, Label> (
   initialState: State,
   private val scope: CoroutineScope,
   autoInit: Boolean = true,
   private val bootstrapper: Bootstrapper<Action>? = null,
-  private val executor: Executor<Intent, Action, State, Message, Label>,
+  private val executor: Executor<Intent, Action, Message, State, Label>,
   private val reducer: Reducer<State, Message>,
-  labelFlow: MutableSharedFlow<Label> = MutableSharedFlow(),
+  private val _label: MutableSharedFlow<Label> = MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST),
 ) : Store<Intent, State, Label> {
 
 
   private val _state = MutableStateFlow(initialState)
   override val state: StateFlow<State> = _state
 
-  private val _label = labelFlow
-  override val labels: MutableSharedFlow<Label> = _label
+  override val labels: SharedFlow<Label> = _label
 
   private inner class BootstrapperScopeImpl : BootstrapperScope<Action> {
     override val coroutineScope: CoroutineScope = scope
@@ -32,13 +34,13 @@ class StoreImpl<Intent, Action, State, Message, Label> (
     }
   }
 
-  private inner class ExecutorScopeImpl : ExecutorScope<Action, State, Message, Label> {
+  private inner class ExecutorScopeImpl : ExecutorScope<Action, Message, State, Label> {
     override fun state() = _state.value
 
     override val coroutineScope: CoroutineScope = scope
 
     override fun dispatch(message: Message) {
-      _state.value = reducer.reduce(_state.value, message)
+      _state.update { reducer.reduce(it, message) }
     }
 
     override fun tryEmit(label: Label): Boolean {

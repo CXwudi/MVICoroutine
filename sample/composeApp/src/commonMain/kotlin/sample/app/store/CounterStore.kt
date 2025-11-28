@@ -55,8 +55,8 @@ private class CounterBootstrapper : Bootstrapper<CounterAction> {
 }
 
 private class CounterExecutor :
-  Executor<CounterIntent, CounterAction, CounterState, CounterMessage, CounterLabel> {
-  override fun ExecutorScope<CounterAction, CounterState, CounterMessage, CounterLabel>.executeIntent(
+  Executor<CounterIntent, CounterAction, CounterMessage, CounterState, CounterLabel> {
+  override fun ExecutorScope<CounterAction, CounterMessage, CounterState, CounterLabel>.executeIntent(
     intent: CounterIntent
   ) {
     val count = state().count
@@ -67,7 +67,7 @@ private class CounterExecutor :
     }
   }
 
-  override fun ExecutorScope<CounterAction, CounterState, CounterMessage, CounterLabel>.executeAction(
+  override fun ExecutorScope<CounterAction, CounterMessage, CounterState, CounterLabel>.executeAction(
     action: CounterAction
   ) {
     when (action) {
